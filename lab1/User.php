@@ -31,8 +31,9 @@ class User
 
         $violations = $this->validatePassword($password);
         $this->printViolations($violations, "Invalid user password $password");
-        
+
         //if the data is incorrect, then don't write it 
+        
         if (count($violations)==0) {
             $this->id = $id;
             $this->name = $name;
