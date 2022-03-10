@@ -5,7 +5,7 @@ require_once __DIR__.'/Comment.php';
 
 $comments = array();
 
-for ($i = 0; $i < 5; ++$i) {
+for ($i = 0; $i < 10; ++$i) {
     $user = new User("1234$i", 'Valeria', 'valeriya@mail.ru', 'a54uyVg454hh4');
     $comments[$i] = new Comment($user, "message num$i");
     sleep($i + 1);
