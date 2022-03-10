@@ -1,74 +1,54 @@
 <?php
- 
- require_once __DIR__.'/../vendor/autoload.php';
 
- use Symfony\Component\Validator\Validation;
- use Symfony\Component\Validator\ConstraintViolationListInterface;
- use Symfony\Component\Validator\Constraints\{Length, NotBlank, Email, Regex};
- 
+require_once __DIR__.'/vendor/autoload.php';
 
- class User{
+use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\Regex;
 
+class User
+{
     private string $id;
     private string $name;
     private string $password;
     private string $email;
-    private $constructTime;
+    private $dateTime;
 
-
-    public function __construct(string $id, string $name,string $email, string $password)
+    public function __construct(string $id, string $name, string $email, string $password)
     {
-        $this->_constructTime = date("F j, Y, g:i a");
-
-        $violations = $this->validateName($name);
-        $this->printViolations($violations, 'Invalid username');
-
+        $this->dateTime = date('Y-m-d H:i:s');
 
         $violations = $this->validateId($id);
-        $this->printViolations($violations, 'Invalid user id');
+        $this->printViolations($violations, "Invalid user id $id");
 
+        $violations = $this->validateName($name);
+        $this->printViolations($violations, "Invalid username $name");
 
-        $violations = $this->validatePass($password);
-        $this->printViolations($violations, 'Invalid user password');
+        $violations = $this->validateEmail($email);
+        $this->printViolations($violations, "Invalid email $email");
 
+        $violations = $this->validatePassword($password);
+        $this->printViolations($violations, "Invalid user password $password");
 
-        $this->id = $id;
-        $this->name = $name;
-        $this->password = $password;
-    }
-    public function getCunstructDate()
-    {
-        return $this->_constructTime;
-    }
-
-    public function echoPrint(): void
-    {
-        echo "<br>User:<br>";
-        echo "Id: $this->id<br>";
-        echo "Name: $this->name<br>";
-        echo "Password: $this->password<br>";
-    }
-
-    private function printViolations(ConstraintViolationListInterface $violations, string $title): void
-    {
-        if (count($violations) == 0)
-            return;
-        echo '<h3>' . $title . '</h3>';
-        foreach ($violations as $violation) {
-            echo $violation->getMessage() . '<br>';
+        if (count($violations)==0) {
+            $this->id = $id;
+            $this->name = $name;
+            $this->email = $email;
+            $this->password = $password;
+        } else {
+            $this->id = "No id";
+            $this->name = "No name";
+            $this->email = "No email";
+            $this->password = "No password";
         }
     }
-
-    private function validateName(string $name):ConstraintViolationListInterface
+    public function getDateTime()
     {
-        $validator = Validation::createValidator();
-        return $validator->validate($name, [
-            new Length(['min' => 7]),
-            new NotBlank(),
-            new Email(),
-        ]);
+        return $this->dateTime;
     }
-
     private function validateId(string $id): ConstraintViolationListInterface
     {
         $validator = Validation::createValidator();
@@ -78,7 +58,25 @@
         ]);
     }
 
-    private function validatePass(string $password): ConstraintViolationListInterface
+    private function validateName(string $name): ConstraintViolationListInterface
+    {
+        $validator = Validation::createValidator();
+        return $validator->validate($name, [
+            new NotBlank(),
+            new Regex(['pattern' => '/^([А-Я]{1}[а-яё]{1,23}|[A-Z]{1}[a-z]{1,23})$/',]),
+        ]);
+    }
+
+    private function validateEmail(string $email): ConstraintViolationListInterface
+    {
+        $validator = Validation::createValidator();
+        return $validator->validate($email, [
+            new Length(['min' => 7]),
+            new NotBlank(),
+            new Email(),
+        ]);
+    }
+    private function validatePassword(string $password): ConstraintViolationListInterface
     {
         $validator = Validation::createValidator();
         return $validator->validate($password, [
@@ -86,6 +84,23 @@
             new Regex(['pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{12,25}$/',]),
         ]);
     }
+    public function print(): void
+    {
+        echo '<br>'."User:".'<br>';
+        echo "Id: $this->id".'<br>';
+        echo "Name: $this->name".'<br>';
+        echo "Email: $this->email".'<br>';
+        echo "Password: $this->password".'<br>';
+    }
 
-
- }
+    private function printViolations(ConstraintViolationListInterface $violations, string $title): void
+    {
+        if (count($violations) == 0) {
+            return;
+        }
+        echo  '<br>'.$title.'<br>';
+        foreach ($violations as $violation) {
+            echo $violation->getMessage() . '<br>';
+        }
+    }
+}
